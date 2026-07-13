@@ -47,7 +47,7 @@ export async function issueCertificate(formData: FormData) {
   const recipientName = formData.get('recipientName') as string;
 
   if (!studentId || !courseId || !recipientName) {
-    return { error: 'All fields are required' };
+    throw new Error('All fields are required');
   }
 
   const certHash = generateHMAC(studentId, courseId);
@@ -62,7 +62,6 @@ export async function issueCertificate(formData: FormData) {
   });
 
   revalidatePath('/admin');
-  return { success: true };
 }
 
 export async function deleteCertificate(id: string) {
@@ -78,7 +77,7 @@ export async function updateCertificate(id: string, formData: FormData) {
   const recipientName = formData.get('recipientName') as string;
 
   if (!studentId || !courseId || !recipientName) {
-    return { error: 'All fields are required' };
+    throw new Error('All fields are required');
   }
 
   const certHash = generateHMAC(studentId, courseId);
