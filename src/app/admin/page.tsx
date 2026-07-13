@@ -3,6 +3,8 @@ import { adminLogout, issueCertificate, deleteCertificate } from '@/app/actions/
 import Link from 'next/link';
 import { DeleteButton } from '@/components/DeleteButton';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminDashboard() {
   const certificates = await prisma.certificate.findMany({
     orderBy: { createdAt: 'desc' }
