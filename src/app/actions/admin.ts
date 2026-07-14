@@ -75,12 +75,14 @@ export async function updateCertificate(id: string, formData: FormData) {
   const studentId = formData.get('studentId') as string;
   const courseId = formData.get('courseId') as string;
   const recipientName = formData.get('recipientName') as string;
+  const issuedAtString = formData.get('issuedAt') as string;
 
   if (!studentId || !courseId || !recipientName) {
     throw new Error('All fields are required');
   }
 
   const certHash = generateHMAC(studentId, courseId);
+  const issuedAt = issuedAtString ? new Date(issuedAtString) : new Date();
 
   await prisma.certificate.update({
     where: { id },
@@ -89,6 +91,7 @@ export async function updateCertificate(id: string, formData: FormData) {
       courseId,
       recipientName,
       certHash,
+      issuedAt,
     }
   });
 

@@ -51,6 +51,11 @@ export default async function EditCertificatePage({ params }: { params: Promise<
               <input type="text" name="courseId" defaultValue={certificate.courseId} required className="w-full p-2 rounded bg-background border border-border focus:ring-2 focus:ring-primary outline-none transition-shadow" />
             </div>
 
+            <div>
+              <label className="block text-sm font-medium mb-1 text-muted-foreground">Date of Issue</label>
+              <input type="date" name="issuedAt" defaultValue={certificate.issuedAt.toISOString().split('T')[0]} required className="w-full p-2 rounded bg-background border border-border focus:ring-2 focus:ring-primary outline-none transition-shadow" />
+            </div>
+
             <div className="pt-4 flex justify-end gap-4">
               <Link href="/admin" className="px-6 py-2 rounded font-medium border border-border hover:bg-muted/50 transition-colors">
                 Cancel
