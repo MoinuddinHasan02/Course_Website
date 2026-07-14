@@ -21,22 +21,24 @@ export function About() {
             </div>
 
             <div className="flex justify-center gap-4">
-              <Link 
+              <a 
                 href="https://wa.me/917829449074" 
                 target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-2 px-6 py-3 rounded-full bg-[#25D366]/10 text-[#25D366] border border-[#25D366]/30 hover:bg-[#25D366]/20 transition-all font-bold"
               >
                 <MessageCircle size={20} />
                 WhatsApp
-              </Link>
-              <Link 
+              </a>
+              <a 
                 href="https://www.linkedin.com/in/aejaz-ahmed-a4710472/" 
                 target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-2 px-6 py-3 rounded-full bg-[#0077b5]/10 text-[#0077b5] border border-[#0077b5]/30 hover:bg-[#0077b5]/20 transition-all font-bold"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
                 LinkedIn
-              </Link>
+              </a>
             </div>
           </div>
 

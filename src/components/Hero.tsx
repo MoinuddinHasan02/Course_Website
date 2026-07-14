@@ -34,22 +34,24 @@ export function Hero() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-10">
-            <Link 
+            <a 
               href="https://forms.gle/qeDv1BP5acFm2N4j6" 
               target="_blank"
+              rel="noopener noreferrer"
               className="px-8 py-4 bg-primary text-background font-black rounded-xl hover:bg-accent transition-all flex items-center justify-center gap-2 text-lg shadow-[0_0_30px_rgba(234,179,8,0.3)]"
             >
               Enroll Now
               <ChevronRight size={20} />
-            </Link>
-            <Link 
+            </a>
+            <a 
               href="https://wa.me/917829449074" 
               target="_blank"
+              rel="noopener noreferrer"
               className="px-8 py-4 glass text-foreground font-bold rounded-xl hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-lg"
             >
               <MessageCircle size={20} className="text-primary" />
               Message Now
-            </Link>
+            </a>
           </div>
 
           <div className="flex items-center gap-8 text-muted">

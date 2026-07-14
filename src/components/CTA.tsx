@@ -18,14 +18,15 @@ export function CTA() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <Link
+            <a
               href="https://wa.me/917829449074"
               target="_blank"
+              rel="noopener noreferrer"
               className="px-10 py-5 bg-primary text-background font-black rounded-2xl hover:bg-accent transition-all flex items-center justify-center gap-3 text-xl shadow-2xl"
             >
               <MessageCircle size={24} />
               Message Now to Join
-            </Link>
+            </a>
           </div>
           
           <p className="mt-8 text-sm font-bold text-primary flex items-center justify-center gap-2">
