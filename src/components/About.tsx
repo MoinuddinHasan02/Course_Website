@@ -14,7 +14,7 @@ export function About() {
                   src="/trainer.png" 
                   alt="Mohammed Aejaz Ahmed" 
                   fill 
-                  className="object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                  className="object-cover hover:scale-105 transition-all duration-700"
                 />
               </div>
 
