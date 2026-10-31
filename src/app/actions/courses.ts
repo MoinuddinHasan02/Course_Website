@@ -9,7 +9,7 @@ import {
   VideoSchema,
   StudentCreateSchema,
 } from '@/lib/security/prompt-defense';
-import { hash } from 'bcrypt';
+import { hash } from 'bcryptjs';
 import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 

@@ -1,38 +1,9 @@
-import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { encrypt, decrypt, SessionPayload, Role } from './jwt';
 
-const SECRET_KEY = process.env.SERVER_SECRET_SALT || 'aejaz_training_prod_fallback_salt_2026_secure';
-const key = new TextEncoder().encode(SECRET_KEY);
-
-export type Role = 'ADMIN' | 'STUDENT';
-
-export interface SessionPayload {
-  userId: string;
-  email: string;
-  name?: string | null;
-  role: Role;
-  expires: string;
-}
-
-export async function encrypt(payload: any) {
-  return await new SignJWT(payload)
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime('7d')
-    .sign(key);
-}
-
-export async function decrypt(input: string): Promise<SessionPayload | null> {
-  try {
-    const { payload } = await jwtVerify(input, key, {
-      algorithms: ['HS256'],
-    });
-    return payload as unknown as SessionPayload;
-  } catch {
-    return null;
-  }
-}
+export { encrypt, decrypt };
+export type { SessionPayload, Role };
 
 export async function createSession(user: { id: string; email: string; name?: string | null; role: Role }) {
   const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days session

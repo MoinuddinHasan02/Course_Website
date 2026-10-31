@@ -5,7 +5,7 @@ import { createSession, logout, requireAdmin } from '@/lib/auth';
 import { generateHMAC } from '@/lib/security';
 import { rateLimit, RATE_LIMIT_PROFILES, getClientIp } from '@/lib/rate-limit';
 import { sanitizeInput, checkPromptInjection } from '@/lib/security/prompt-defense';
-import { compare, hash } from 'bcrypt';
+import { compare, hash } from 'bcryptjs';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { headers } from 'next/headers';

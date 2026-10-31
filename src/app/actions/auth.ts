@@ -3,8 +3,8 @@
 import { prisma } from '@/lib/prisma';
 import { createSession, logout } from '@/lib/auth';
 import { rateLimit, RATE_LIMIT_PROFILES, getClientIp } from '@/lib/rate-limit';
-import { checkPromptInjection, sanitizeInput, LoginSchema } from '@/lib/security/prompt-defense';
-import { compare, hash } from 'bcrypt';
+import { checkPromptInjection, LoginSchema } from '@/lib/security/prompt-defense';
+import { compare, hash } from 'bcryptjs';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
@@ -12,9 +12,9 @@ export async function loginUser(prevState: any, formData: FormData) {
   const reqHeaders = await headers();
   const clientIp = getClientIp(reqHeaders);
 
-  // 1. Rate Limiting Check (Max 5 attempts per 60s per IP)
+  // 1. Rate Limiting Check (Max 10 attempts per 60s per IP)
   const rlKey = `auth_login:${clientIp}`;
-  const rlResult = rateLimit(rlKey, RATE_LIMIT_PROFILES.AUTH);
+  const rlResult = rateLimit(rlKey, { limit: 10, windowMs: 60 * 1000 });
   if (!rlResult.success) {
     return {
       error: `Too many login attempts. Please wait ${rlResult.retryAfter} seconds before trying again.`,
@@ -42,24 +42,36 @@ export async function loginUser(prevState: any, formData: FormData) {
   const { email, password } = parseResult.data;
 
   // 4. Find user in database
-  let user = await prisma.user.findUnique({
-    where: { email: email.toLowerCase() },
-  });
+  let user: any = null;
+  try {
+    user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase().trim() },
+    });
+  } catch (dbErr: any) {
+    console.error('Database connection error in login:', dbErr);
+    return {
+      error: 'Database connection failed. Please ensure DATABASE_URL is set correctly in Vercel.',
+    };
+  }
 
   // Seed default admin if no users exist in the system yet
   if (!user) {
-    const totalUsers = await prisma.user.count();
-    if (totalUsers === 0) {
-      const hashedPassword = await hash(password, 10);
-      user = await prisma.user.create({
-        data: {
-          email: email.toLowerCase(),
-          password: hashedPassword,
-          name: 'Super Admin',
-          role: 'ADMIN',
-        },
-      });
-    } else {
+    try {
+      const totalUsers = await prisma.user.count();
+      if (totalUsers === 0) {
+        const hashedPassword = await hash(password, 10);
+        user = await prisma.user.create({
+          data: {
+            email: email.toLowerCase().trim(),
+            password: hashedPassword,
+            name: 'Super Admin',
+            role: 'ADMIN',
+          },
+        });
+      } else {
+        return { error: 'Invalid email or password.' };
+      }
+    } catch {
       return { error: 'Invalid email or password.' };
     }
   }
