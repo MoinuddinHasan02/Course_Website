@@ -19,10 +19,9 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     }
 
     // 1. Generate QR Code pointing to the verification page
-    // In production, NEXT_PUBLIC_APP_URL can force the domain (e.g. https://www.aejaz.in)
-    const host = request.headers.get('host') || 'localhost:3000';
-    const protocol = host.includes('localhost') ? 'http' : 'https';
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
+    // In production, force the domain to https://www.aejaz.in
+    const host = request.headers.get('host') || 'www.aejaz.in';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (host.includes('aejaz.in') ? `https://${host}` : 'https://www.aejaz.in');
     const verifyUrl = `${baseUrl}/verify/${id}`;
     
     // High-correction QR code, 1-module margin so it sits neatly in the template's box

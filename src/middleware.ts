@@ -3,28 +3,40 @@ import type { NextRequest } from 'next/server';
 import { decrypt } from '@/lib/auth';
 
 export async function middleware(request: NextRequest) {
-  const session = request.cookies.get('session')?.value;
-  
-  // Protect all /admin routes except /admin/login
-  if (request.nextUrl.pathname.startsWith('/admin') && !request.nextUrl.pathname.startsWith('/admin/login')) {
+  const { pathname } = request.nextUrl;
+  const sessionCookie = request.cookies.get('session')?.value;
+  const session = sessionCookie ? await decrypt(sessionCookie) : null;
+
+  // Protect Admin routes
+  if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
     if (!session) {
-      return NextResponse.redirect(new URL('/admin/login', request.url));
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
     }
-    
-    try {
-      await decrypt(session);
-    } catch (err) {
-      return NextResponse.redirect(new URL('/admin/login', request.url));
+    if (session.role !== 'ADMIN') {
+      // Authenticated but not an admin -> redirect to student portal
+      return NextResponse.redirect(new URL('/student', request.url));
     }
   }
-  
-  // Redirect /admin/login to /admin if already logged in
-  if (request.nextUrl.pathname.startsWith('/admin/login')) {
+
+  // Protect Student portal routes
+  if (pathname.startsWith('/student')) {
+    if (!session) {
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
+  // If already authenticated and visiting login page, redirect based on role
+  if (pathname === '/login' || pathname === '/admin/login') {
     if (session) {
-      try {
-        await decrypt(session);
+      if (session.role === 'ADMIN') {
         return NextResponse.redirect(new URL('/admin', request.url));
-      } catch (err) {}
+      } else {
+        return NextResponse.redirect(new URL('/student', request.url));
+      }
     }
   }
 
@@ -32,5 +44,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/admin/:path*', '/student/:path*', '/login'],
 };

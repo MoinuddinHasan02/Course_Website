@@ -1,17 +1,6 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { ScrollProgress } from "@/components/ScrollProgress";
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Primavera P6 Training | Aejaz Training",
@@ -64,9 +53,15 @@ export default function RootLayout({
 
   return (
     <html lang="en" className="dark scroll-smooth">
-      <body
-        className={`${inter.variable} ${outfit.variable} font-sans bg-background text-foreground antialiased`}
-      >
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="font-sans bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary">
         <ScrollProgress />
         <script
           type="application/ld+json"

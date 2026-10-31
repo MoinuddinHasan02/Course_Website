@@ -1,50 +1,92 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { login, logout } from '@/lib/auth';
+import { createSession, logout, requireAdmin } from '@/lib/auth';
 import { generateHMAC } from '@/lib/security';
+import { rateLimit, RATE_LIMIT_PROFILES, getClientIp } from '@/lib/rate-limit';
+import { sanitizeInput, checkPromptInjection } from '@/lib/security/prompt-defense';
 import { compare, hash } from 'bcrypt';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { headers } from 'next/headers';
 
 export async function adminLogin(prevState: any, formData: FormData) {
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
+  const reqHeaders = await headers();
+  const clientIp = getClientIp(reqHeaders);
 
-  if (!email || !password) return { error: 'Missing fields' };
+  const rl = rateLimit(`admin_login:${clientIp}`, RATE_LIMIT_PROFILES.AUTH);
+  if (!rl.success) {
+    return { error: `Too many attempts. Retry in ${rl.retryAfter}s.` };
+  }
+
+  const rawEmail = formData.get('email') as string;
+  const rawPassword = formData.get('password') as string;
+
+  if (!rawEmail || !rawPassword) return { error: 'Missing fields' };
+
+  if (checkPromptInjection(rawEmail).isMalicious) {
+    return { error: 'Suspicious input format detected.' };
+  }
+
+  const email = rawEmail.toLowerCase().trim();
+  const password = rawPassword;
 
   // For the very first run, create the admin user if none exists
   let admin = await prisma.user.findUnique({ where: { email } });
-  
+
   if (!admin) {
     const userCount = await prisma.user.count();
     if (userCount === 0) {
-      // Create first admin
+      // Create first super admin
       const hashedPassword = await hash(password, 10);
       admin = await prisma.user.create({
-        data: { email, password: hashedPassword }
+        data: {
+          email,
+          password: hashedPassword,
+          name: 'Super Admin',
+          role: 'ADMIN',
+        },
       });
     } else {
       return { error: 'Invalid credentials' };
     }
   }
 
+  if (admin.role !== 'ADMIN') {
+    return { error: 'Unauthorized: Admin privileges required.' };
+  }
+
   const isValid = await compare(password, admin.password);
   if (!isValid) return { error: 'Invalid credentials' };
 
-  await login(admin.id);
+  await createSession({
+    id: admin.id,
+    email: admin.email,
+    name: admin.name,
+    role: 'ADMIN',
+  });
+
   redirect('/admin');
 }
 
 export async function adminLogout() {
   await logout();
-  redirect('/admin/login');
+  redirect('/login');
 }
 
 export async function issueCertificate(formData: FormData) {
-  const studentId = formData.get('studentId') as string;
-  const courseId = formData.get('courseId') as string;
-  const recipientName = formData.get('recipientName') as string;
+  await requireAdmin();
+  const reqHeaders = await headers();
+  const clientIp = getClientIp(reqHeaders);
+
+  const rl = rateLimit(`cert_mutate:${clientIp}`, RATE_LIMIT_PROFILES.MUTATION);
+  if (!rl.success) {
+    throw new Error(`Rate limit exceeded. Try again in ${rl.retryAfter}s.`);
+  }
+
+  const studentId = sanitizeInput(formData.get('studentId'));
+  const courseId = sanitizeInput(formData.get('courseId'));
+  const recipientName = sanitizeInput(formData.get('recipientName'));
 
   if (!studentId || !courseId || !recipientName) {
     throw new Error('All fields are required');
@@ -58,24 +100,27 @@ export async function issueCertificate(formData: FormData) {
       courseId,
       recipientName,
       certHash,
-    }
+    },
   });
 
   revalidatePath('/admin');
 }
 
 export async function deleteCertificate(id: string) {
+  await requireAdmin();
   await prisma.certificate.delete({
-    where: { id }
+    where: { id },
   });
   revalidatePath('/admin');
 }
 
 export async function updateCertificate(id: string, formData: FormData) {
-  const studentId = formData.get('studentId') as string;
-  const courseId = formData.get('courseId') as string;
-  const recipientName = formData.get('recipientName') as string;
-  const issuedAtString = formData.get('issuedAt') as string;
+  await requireAdmin();
+
+  const studentId = sanitizeInput(formData.get('studentId'));
+  const courseId = sanitizeInput(formData.get('courseId'));
+  const recipientName = sanitizeInput(formData.get('recipientName'));
+  const issuedAtString = sanitizeInput(formData.get('issuedAt'));
 
   if (!studentId || !courseId || !recipientName) {
     throw new Error('All fields are required');
@@ -92,7 +137,7 @@ export async function updateCertificate(id: string, formData: FormData) {
       recipientName,
       certHash,
       issuedAt,
-    }
+    },
   });
 
   revalidatePath('/admin');

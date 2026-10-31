@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/admin/', '/api/'],
+      disallow: ['/admin/', '/student/', '/api/'],
     },
     sitemap: 'https://www.aejaz.in/sitemap.xml',
   }

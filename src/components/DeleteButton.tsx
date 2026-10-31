@@ -1,8 +1,15 @@
 'use client';
 
 import { useTransition } from 'react';
+import { deleteCertificate } from '@/app/actions/admin';
 
-export function DeleteButton({ id, deleteAction }: { id: string, deleteAction: (id: string) => Promise<void> }) {
+export function DeleteButton({
+  id,
+  deleteAction = deleteCertificate,
+}: {
+  id: string;
+  deleteAction?: (id: string) => Promise<void>;
+}) {
   const [isPending, startTransition] = useTransition();
 
   const handleDelete = () => {
@@ -18,7 +25,7 @@ export function DeleteButton({ id, deleteAction }: { id: string, deleteAction: (
       type="button"
       onClick={handleDelete}
       disabled={isPending}
-      className="text-red-500 hover:underline text-sm disabled:opacity-50"
+      className="text-red-400 hover:text-red-300 hover:underline text-[11px] disabled:opacity-50 cursor-pointer"
     >
       {isPending ? 'Deleting...' : 'Delete'}
     </button>
