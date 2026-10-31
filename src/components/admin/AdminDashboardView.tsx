@@ -205,14 +205,14 @@ export function AdminDashboardView({
                           <td className="py-3 px-4 text-right">
                             <div className="flex justify-end gap-2 items-center">
                               <Link
-                                href={`/verify/${cert.studentId}`}
+                                href={`/verify/${cert.id}`}
                                 target="_blank"
                                 className="text-primary hover:underline font-bold text-[11px]"
                               >
                                 Verify
                               </Link>
                               <a
-                                href={`/api/certificates/generate/${cert.studentId}`}
+                                href={`/api/certificates/generate/${cert.id}`}
                                 target="_blank"
                                 className="text-muted hover:text-foreground text-[11px]"
                               >

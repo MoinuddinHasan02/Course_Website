@@ -10,9 +10,17 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
   const id = params.id;
 
   try {
-    const certificate = await prisma.certificate.findUnique({
-      where: { id }
-    });
+    const rawId = decodeURIComponent(id).trim();
+    let certificate = await prisma.certificate.findUnique({
+      where: { id: rawId }
+    }).catch(() => null);
+
+    if (!certificate) {
+      certificate = await prisma.certificate.findFirst({
+        where: { studentId: rawId },
+        orderBy: { createdAt: 'desc' }
+      });
+    }
 
     if (!certificate) {
       return new NextResponse('Certificate not found', { status: 404 });
@@ -22,7 +30,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     // In production, force the domain to https://www.aejaz.in
     const host = request.headers.get('host') || 'www.aejaz.in';
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (host.includes('aejaz.in') ? `https://${host}` : 'https://www.aejaz.in');
-    const verifyUrl = `${baseUrl}/verify/${id}`;
+    const verifyUrl = `${baseUrl}/verify/${certificate.id}`;
     
     // High-correction QR code, 1-module margin so it sits neatly in the template's box
     const qrCodeDataUrl = await QRCode.toDataURL(verifyUrl, {

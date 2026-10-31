@@ -25,7 +25,7 @@ export default function VerifyPage() {
         <form onSubmit={handleVerify} className="flex flex-col gap-4">
           <input
             type="text"
-            placeholder="e.g. f81d4fae-7dec-11d0-a765-00a0c91e6bf6"
+            placeholder="e.g. UUID or Student Roll No (e.g. AEJAZ-2026-001)"
             value={certId}
             onChange={(e) => setCertId(e.target.value)}
             className="w-full p-3 rounded-lg bg-background border border-border focus:ring-2 focus:ring-primary outline-none"
